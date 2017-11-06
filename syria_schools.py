@@ -1,15 +1,25 @@
 from bs4 import BeautifulSoup
 import requests
 import pymongo
+from mLabsignin import username, password
 
-conn = 'mongodb://localhost:27017'
+#establish connection to db
+conn = 'mongodb://%s:%s@ds149905.mlab.com:49905/heroku_236cmwk4' % (username, password)
 client = pymongo.MongoClient(conn)
 
 #url = "http://sn4hr.org/page/" + num + "/?s=school"
 
-db = client.syria
+#define db
+db = client.heroku_236cmwk4
+
+###if needed to start fresh
+# db.drop_collection('school_attacks')
+# print("collection dropped")
+
+#define collection
 collection = db.school_attacks
 
+# get a list of links from search pages
 link_list = []
 for x in range(1, 50):
     try:
@@ -22,49 +32,49 @@ for x in range(1, 50):
         for result in results:
             link_to_article = result.a['href']
             link_list.append(link_to_article)
-    
+    except:
+        print('error')
+print("links retreived")
+# keep count of articles added to database
+art_count = 1
 
+# loop through links and add new aticles to database if they contain the word school
 for link in link_list:
-    url = link
-    response2 = requests.get(url)
-    soup2 = BeautifulSoup(response2.text, 'html.parser')
- 
-    title = soup2.find('h1', class_="entry-title").text
-    body = soup2.find('h5').text
-    date_published = soup2.find('time', class_="entry-date updated td-module-date").text
-    art_link = link
-    unique_key = title + date_published
+    try:
+        url = link
+        response2 = requests.get(url)
+        soup2 = BeautifulSoup(response2.text, 'html.parser')
+        title = soup2.find('h1', class_="entry-title").text
+        body = soup2.find('h5').text
+        title_lower = title.lower()
+        body_lower = body.lower()
+        if 'school' in title_lower or 'school' in body_lower:
+            date_published = soup2.find('time', class_="entry-date updated td-module-date").text
+            art_link = link
+            unique_key = title + date_published
 
-    print(date_published)
+            print(date_published)
 
-    count = collection.find({"unique_key": unique_key}).count()
-    
-    if count == 0:
-        
-        post = {
-            "article_title": title,
-            "article_text": body,
-            "date_published": date_published,
-            "article_link": art_link,
-            "unique_key": unique_key 
-        }
+            count = collection.find({"unique_key": unique_key}).count()
+            
+            if count == 0:
+                
+                post = {
+                    "article_title": title,
+                    "title_lowercase": title_lower,
+                    "article_text": body,
+                    "article_text_lower": body_lower,
+                    "date_published": date_published,
+                    "article_link": art_link,
+                    "unique_key": unique_key 
+                }
 
-        collection.insert_one(post)
-    else:
-        print('Already in Database')
-    
-# post = {
-#     "title":
-#     "link": link 
-# }
+                collection.insert_one(post)
+            else:
+                print('Already in Database')
+            art_count += 1
+    except:
+        "Error"
 
-# link 
-# date
-# date_of_attack
-
-# post = {
-#     "link_to_article": link_to_article,
-#     "date_of_attack": 
-#     "headline":
-#     "who_fired"
-# }
+#print report
+print(str(art_count) + "articles_added")
