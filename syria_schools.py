@@ -11,16 +11,18 @@ db = client.syria
 collection = db.school_attacks
 
 link_list = []
-for x in range(1, 2):
-    url = "http://sn4hr.org/page/" + str(x) + "/?s=school"
-    response = requests.get(url)
-    soup = BeautifulSoup(response.text, 'html.parser')
+for x in range(1, 50):
+    try:
+        url = "http://sn4hr.org/page/" + str(x) + "/?s=school"
+        response = requests.get(url)
+        soup = BeautifulSoup(response.text, 'html.parser')
 
-    results = soup.find_all('h3', class_="entry-title td-module-title")
+        results = soup.find_all('h3', class_="entry-title td-module-title")
+        
+        for result in results:
+            link_to_article = result.a['href']
+            link_list.append(link_to_article)
     
-    for result in results:
-        link_to_article = result.a['href']
-        link_list.append(link_to_article)
 
 for link in link_list:
     url = link
