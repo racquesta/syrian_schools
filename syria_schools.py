@@ -1,10 +1,11 @@
 from bs4 import BeautifulSoup
 import requests
 import pymongo
-from mLabsignin import username, password
+# from mLabsignin import username, password
 
 #establish connection to db
-conn = 'mongodb://%s:%s@ds149905.mlab.com:49905/heroku_236cmwk4' % (username, password)
+# conn = 'mongodb://%s:%s@ds149905.mlab.com:49905/heroku_236cmwk4' % (username, password)
+conn = 'mongodb://%s:%s@ds149905.mlab.com:49905/heroku_236cmwk4' % (admin, syria)
 client = pymongo.MongoClient(conn)
 
 #url = "http://sn4hr.org/page/" + num + "/?s=school"
